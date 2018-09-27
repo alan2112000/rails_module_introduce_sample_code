@@ -1,9 +1,9 @@
 require 'active_support/callbacks'
 class BaseClass
   include ActiveSupport::Callbacks
-  define_callbacks :execute
+  define_callbacks :execute, skip_after_callbacks_if_terminated: :abort
 
-  set_callback :execute, :before, :valid?
+  set_callback :execute, :before, :valid?,
   def valid?
     raise NotImplementError
   end
@@ -15,9 +15,7 @@ class BaseClass
 
 
   def execute
-    return false unless valid?
     run_callbacks :execute do
-
       puts "In excute method itsefl"
     end
   end
@@ -26,6 +24,8 @@ end
 class ChildClass < BaseClass
   def valid?
     puts "in validation"
+
+    throw(:abort)
   end
 
   def sync_method
@@ -35,5 +35,3 @@ end
 
 child_instance = ChildClass.new
 child_instance.execute
-
-
